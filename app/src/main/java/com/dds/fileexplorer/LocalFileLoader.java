@@ -110,16 +110,16 @@ public class LocalFileLoader {
     }
 
     public void search(final LocalFileLoadListener listener, final String fuzzy) {
-        activity.getSupportLoaderManager().restartLoader(type, null, new LoaderManager.LoaderCallbacks<Cursor>() {
+        activity.getSupportLoaderManager().initLoader(type, null, new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 CursorLoader cursorLoaderSearch;
                 if (id == TYPE_CUSTOM) {
                     cursorLoaderSearch = new CursorLoader(activity, QUERY_URI,
-                            new String[]{MediaStore.Files.FileColumns.DATA}, MediaStore.MediaColumns.DISPLAY_NAME + " LIKE ?"+ " AND " + MediaStore.MediaColumns.SIZE + ">0",
+                            new String[]{MediaStore.Files.FileColumns.DATA}, MediaStore.MediaColumns.DATA + " LIKE ?"+ " AND " + MediaStore.MediaColumns.SIZE + ">0",
                             new String[]{"%" + fuzzy + "%"}, MediaStore.Files.FileColumns.DATE_MODIFIED + " DESC");
                 } else {
-                    String selection = "(" + getSelection(id) + ") AND " + MediaStore.MediaColumns.DISPLAY_NAME + " LIKE ?"+ " AND " + MediaStore.MediaColumns.SIZE + ">0";
+                    String selection = "(" + getSelection(id) + ") AND " + MediaStore.MediaColumns.DATA + " LIKE ?"+ " AND " + MediaStore.MediaColumns.SIZE + ">0";
                     cursorLoaderSearch = new CursorLoader(activity, QUERY_URI,
                             new String[]{MediaStore.Files.FileColumns.DATA}, selection,
                             getSelectionArgs(id, fuzzy), MediaStore.Files.FileColumns.DATE_MODIFIED + " DESC");
@@ -164,14 +164,14 @@ public class LocalFileLoader {
             builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
             builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
             builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
-            builder.append(MediaStore.Files.FileColumns.DISPLAY_NAME).append(" LIKE ?");
+            builder.append(MediaStore.Files.FileColumns.DATA).append(" LIKE ?");
         } else if (type == TYPE_PPT) {
             builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
             builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
             builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
             builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
-            builder.append(MediaStore.Files.FileColumns.DISPLAY_NAME).append(" LIKE ? ").append("or ");
-            builder.append(MediaStore.Files.FileColumns.DISPLAY_NAME).append(" LIKE ? ");
+            builder.append(MediaStore.Files.FileColumns.DATA).append(" LIKE ? ").append("or ");
+            builder.append(MediaStore.Files.FileColumns.DATA).append(" LIKE ? ");
         } else if (type == TYPE_EXCEL) {
             builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
             builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
@@ -183,18 +183,17 @@ public class LocalFileLoader {
             builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
             builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("?");
         } else if (type == TYPE_ZIP) {
-            builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
-            builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
-            builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
-            builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
-            builder.append(MediaStore.Files.FileColumns.DISPLAY_NAME).append(" LIKE ?");
+            builder.append(MediaStore.Files.FileColumns.DATA).append(" LIKE ? ").append("OR ");
+            builder.append(MediaStore.Files.FileColumns.DATA).append(" LIKE ? ").append("OR ");
+            builder.append(MediaStore.Files.FileColumns.DATA).append(" LIKE ? ").append("OR ");
+            builder.append(MediaStore.Files.FileColumns.DATA).append(" LIKE ?");
         } else if (type == TYPE_PDF) {
             builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
-            builder.append(MediaStore.Files.FileColumns.DISPLAY_NAME).append(" LIKE ? ").append("OR ");
-            builder.append(MediaStore.Files.FileColumns.DISPLAY_NAME).append(" LIKE ?");
+            builder.append(MediaStore.Files.FileColumns.DATA).append(" LIKE ? ").append("OR ");
+            builder.append(MediaStore.Files.FileColumns.DATA).append(" LIKE ?");
         } else if (type == TYPE_APK) {
             builder.append(MediaStore.Files.FileColumns.MIME_TYPE).append(" = ").append("? ").append("OR ");
-            builder.append(MediaStore.Files.FileColumns.DISPLAY_NAME).append(" LIKE ?");
+            builder.append(MediaStore.Files.FileColumns.DATA).append(" LIKE ?");
         }
         return builder.toString();
 
@@ -232,11 +231,10 @@ public class LocalFileLoader {
             };
         } else if (type == TYPE_ZIP) {
             args = new String[]{
-                    singleton.getMimeTypeFromExtension("rar"),
-                    singleton.getMimeTypeFromExtension("zip"),
-                    singleton.getMimeTypeFromExtension("tar"),
-                    singleton.getMimeTypeFromExtension("iso"),
-                    "%.rar"
+                    "%.rar",
+                    "%.zip",
+                    "%.iso",
+                    "%.tar"
             };
         } else if (type == TYPE_APK) {
             args = new String[]{singleton.getMimeTypeFromExtension("apk"),
